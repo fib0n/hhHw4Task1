@@ -5,4 +5,4 @@
 
 Usage:
 ====
-$python oauth.py <login> <password> 
+$python oauth.py login password 
