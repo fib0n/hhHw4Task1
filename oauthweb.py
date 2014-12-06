@@ -1,3 +1,4 @@
+# coding=utf-8
 from tornado.ioloop import IOLoop
 from tornado.web import RequestHandler, Application, url
 
@@ -50,36 +51,39 @@ def get_info(token):
 
 class IndexHandler(RequestHandler):
     def get(self):
-        self.write(get_auth_url())
+        self.write('<a href="%s">Войти через reddit</a>' % get_auth_url())
 
     def data_received(self, chunk):
         pass
 
 
 class OAuthCallbackHandler(RequestHandler):
+    def write_error(self, status_code, **kwargs):
+        self.clear()
+        message = kwargs.get('message', 'Internal server error')
+        self.set_status(status_code, message)
+        self.write(message)
+
     def get(self):
         error = self.get_argument('error', None)
         if error:
-            self.clear()
-            self.finish('Error: ' + error)
+            self.write_error(500, message='Error: ' + error)
+            return
 
         state = self.get_argument('state')
         if state not in STATES:
-            self.clear()
-            self.set_status(403, 'state %s is not exists' % state)
+            self.write_error(403, message1='State %s is not exists' % state)
             return
 
         STATES.remove(state)
         code = self.get_argument('code')
         if not code:
-            self.clear()
-            self.set_status(500, 'code is empty')
+            self.write_error(500, message='Code is empty')
             return
 
         token_response_json = get_token_response_json(code)
         if 'error' in token_response_json or 'access_token' not in token_response_json:
-            self.clear()
-            self.set_status(500, 'Could not get access_token. ' + token_response_json)
+            self.write_error(500, message="Couldn't get token. Response: " + token_response_json)
             return
 
         token = token_response_json['access_token']
