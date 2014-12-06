@@ -72,7 +72,7 @@ class OAuthCallbackHandler(RequestHandler):
 
         state = self.get_argument('state')
         if state not in STATES:
-            self.write_error(403, message1='State %s is not exists' % state)
+            self.write_error(403, message='State %s is not exists' % state)
             return
 
         STATES.remove(state)
