@@ -70,23 +70,24 @@ class OAuthCallbackHandler(RequestHandler):
             self.write_error(500, message='Error: ' + error)
             return
 
-        state = self.get_argument('state')
+        state = self.get_argument('state', None)
         if state not in STATES:
-            self.write_error(403, message='State %s is not exists' % state)
+            self.write_error(403, message='State "%s" is not exists' % state)
             return
 
         STATES.remove(state)
-        code = self.get_argument('code')
+        code = self.get_argument('code', None)
         if not code:
             self.write_error(500, message='Code is empty')
             return
 
-        token_response_json = get_token_response_json(code)
-        if 'error' in token_response_json or 'access_token' not in token_response_json:
-            self.write_error(500, message="Couldn't get token. Response: " + token_response_json)
+        json = get_token_response_json(code)
+        if 'error' in json or 'access_token' not in json:
+            self.write_error(500,
+                             message="Couldn't get token. Response: " + str(json))
             return
 
-        token = token_response_json['access_token']
+        token = json['access_token']
         print 'Token: ', token
 
         self.write(get_info(token))
