@@ -36,8 +36,11 @@ def get_token_response_json(code):
     client_auth = requests.auth.HTTPBasicAuth(CLIENT_ID, CLIENT_SECRET)
     post_data = {'grant_type': 'authorization_code', 'code': code,
                  'redirect_uri': REDIRECT_URI}
+
+    headers = {'User-Agent': 'requests by fib0n'}
     response = requests.post(API_URL + 'access_token',
-                             auth=client_auth, data=post_data)
+                             auth=client_auth, data=post_data,
+                             headers=headers)
     json = response.json()
     return json
 
